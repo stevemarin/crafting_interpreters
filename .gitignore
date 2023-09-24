@@ -1,3 +1,5 @@
 a.out
 .vscode
 
+.conda-env-*
+__pycache__
