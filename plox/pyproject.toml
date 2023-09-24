@@ -1,0 +1,17 @@
+[project]
+name = "plox"
+version = "0.1.0"
+description = "Lox implementation in Python from Crafting Interpreters by Bob Nystrom"
+authors = [{name = "Steve Marin", email = "steve.marin@gmail.com"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = []
+classifiers = ["Topic :: Software Development"]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest", "black", "ruff"]
+
+[tool.ruff]
+line-length = 120

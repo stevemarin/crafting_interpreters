@@ -1,0 +1,70 @@
+from textwrap import dedent
+
+import pytest_check as check
+
+from plox.lox import Lox
+from plox.scanner import Scanner
+from plox.tokens import Token, TokenType
+
+# Base test cases from https://github.com/munificent/craftinginterpreters/blob/master/test/scanning/whitespace.lox
+TEST_SRC = dedent(
+    """\
+    space    tabs				newline
+
+
+
+
+    end
+    """
+)
+
+TRUTH_TOKENS = [
+    Token(
+        token_type=TokenType.IDENTIFIER,
+        lexeme="space",
+        lineno=0,
+        end_lineno=0,
+        col_offset=0,
+        end_col_offset=5,
+    ),
+    Token(
+        token_type=TokenType.IDENTIFIER,
+        lexeme="tabs",
+        lineno=0,
+        end_lineno=0,
+        col_offset=9,
+        end_col_offset=13,
+    ),
+    Token(
+        token_type=TokenType.IDENTIFIER,
+        lexeme="newline",
+        lineno=0,
+        end_lineno=0,
+        col_offset=17,
+        end_col_offset=24,
+    ),
+    Token(
+        token_type=TokenType.IDENTIFIER,
+        lexeme="end",
+        lineno=5,
+        end_lineno=5,
+        col_offset=0,
+        end_col_offset=3,
+    ),
+    Token(
+        token_type=TokenType.EOF,
+        lexeme="",
+        lineno=6,
+        end_lineno=6,
+        col_offset=0,
+        end_col_offset=0,
+    ),
+]
+
+
+def test_whitespace_scanning() -> None:
+    scanner = Scanner(TEST_SRC, Lox())
+    tokens = scanner.scan_tokens()
+
+    for idx, token in enumerate(tokens):
+        check.equal(token, TRUTH_TOKENS[idx])
