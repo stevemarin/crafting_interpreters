@@ -222,6 +222,6 @@ Token scanToken() {
             return string();
     }
 
-    return errorToken("Unexpected token.");
+    return errorToken("Unexpected character.");
 }
 

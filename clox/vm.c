@@ -71,7 +71,6 @@ void initVM() {
     defineNative("clock", clockNative);
 }
 
-
 void freeVM() {
     freeTable(&vm.globals);
     freeTable(&vm.strings);
@@ -144,6 +143,7 @@ static ObjUpvalue* captureUpvalue(Value* local) {
     }
 
     ObjUpvalue* createdUpvalue = newUpvalue(local);
+    createdUpvalue->next = upvalue;
 
     if (prevUpvalue == NULL) {
         vm.openUpvalues = createdUpvalue;

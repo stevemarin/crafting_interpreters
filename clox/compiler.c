@@ -213,10 +213,10 @@ static ObjFunction* endCompiler() {
     emitReturn();
     ObjFunction* function = current->function;
     #ifdef DEBUG_PRINT_CODE
-    if (!parser.hadError) {
-        disassembleChunk(currentChunk(),
-            function->name != NULL ? function->name->chars : "<script>");
-    }
+        if (!parser.hadError) {
+            disassembleChunk(currentChunk(),
+                function->name != NULL ? function->name->chars : "<script>");
+        }
     #endif
 
     current = current->enclosing;
@@ -466,7 +466,7 @@ static void funDeclaration() {
 }
 
 static void varDeclaration() {
-    uint8_t global = parseVariable("Expect variable name");
+    uint8_t global = parseVariable("Expect variable name.");
 
     if (match(TOKEN_EQUAL)) {
         expression();

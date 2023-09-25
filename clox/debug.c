@@ -12,7 +12,7 @@ void disassmbleChunk(Chunk *chunk, const char *name) {
         offset = disassembleInstruction(chunk, offset);
     }
 
-};
+}
 
 static int constantInstruction(const char* name, Chunk* chunk, int offset) {
     uint8_t constant = chunk->code[offset + 1];
