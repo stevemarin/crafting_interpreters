@@ -94,14 +94,14 @@ static Value peek(int distance) {
 
 static bool call(ObjClosure* closure, int argCount) {
     if (argCount != closure->function->arity) {
-        runtimeError("Expected %d arguments, but got %d",
+        runtimeError("Expected %d arguments but got %d.",
             closure->function->arity,
             argCount);
         return false;
     }
 
     if (vm.frameCount == FRAMES_MAX) {
-        runtimeError("Stack overflow...");
+        runtimeError("Stack overflow.");
         return false;
     }
  
@@ -195,7 +195,7 @@ static InterpretResult run() {
     #define BINARY_OP(valueType, op) \
         do { \
             if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
-                runtimeError("Operands must be numbers"); \
+                runtimeError("Operands must be numbers."); \
                 return INTERPRET_RUNTIME_ERROR; \
             } \
             double b = AS_NUMBER(pop()); \
