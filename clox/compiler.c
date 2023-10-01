@@ -12,7 +12,7 @@
 #include "value.h"
 
 #ifdef DEBUG_PRINT_CODE
-#include "debug.h"
+    #include "debug.h"
 #endif
 
 typedef struct {
@@ -233,7 +233,7 @@ static ObjFunction* endCompiler() {
     ObjFunction* function = current->function;
     #ifdef DEBUG_PRINT_CODE
         if (!parser.hadError) {
-            disassembleChunk(currentChunk(),
+            disassmbleChunk(currentChunk(),
                 function->name != NULL ? function->name->chars : "<script>");
         }
     #endif
