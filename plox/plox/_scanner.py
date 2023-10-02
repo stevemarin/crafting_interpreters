@@ -1,4 +1,3 @@
-
 import string
 from typing import Any
 
@@ -6,6 +5,7 @@ from plox._token import Token, TokenType
 
 DIGITS = frozenset(string.digits)
 LETTERS = frozenset(string.ascii_letters + "_")
+
 
 class Scanner:
     __slots__ = ("start", "current", "line", "source", "tokens")
@@ -17,51 +17,55 @@ class Scanner:
 
         self.source: str = source
         self.tokens: list[Token] = []
-    
+
     def scan_tokens(self) -> list[Token]:
         while not self.isAtEnd():
             self.start = self.current
             self.scan_token()
-        
+
         self.tokens.append(Token(TokenType.EOF, "", None, self.line))
 
         return self.tokens
-    
+
     def scan_token(self) -> None:
         char: str = self.advance()
         match char:
-            case "(": 
+            case "(":
                 self.add_token(TokenType.LEFT_PAREN)
-            case ")": 
+            case ")":
                 self.add_token(TokenType.RIGHT_PAREN)
-            case "{": 
+            case "{":
                 self.add_token(TokenType.LEFT_BRACE)
-            case "}": 
+            case "}":
                 self.add_token(TokenType.RIGHT_BRACE)
-            case ",": 
+            case ",":
                 self.add_token(TokenType.COMMA)
-            case ".": 
+            case ".":
                 self.add_token(TokenType.DOT)
-            case "-": 
+            case "-":
                 self.add_token(TokenType.MINUS)
-            case "+": 
+            case "+":
                 self.add_token(TokenType.PLUS)
-            case ";": 
+            case ";":
                 self.add_token(TokenType.SEMICOLON)
-            case "*": 
+            case "*":
                 self.add_token(TokenType.STAR)
             case "!":
-                self.add_token(TokenType.BANG_EQUAL if self.match("=") 
-                    else TokenType.BANG)
+                self.add_token(
+                    TokenType.BANG_EQUAL if self.match("=") else TokenType.BANG
+                )
             case "=":
-                self.add_token(TokenType.EQUAL_EQUAL if self.match("=") 
-                    else TokenType.EQUAL)
+                self.add_token(
+                    TokenType.EQUAL_EQUAL if self.match("=") else TokenType.EQUAL
+                )
             case "<":
-                self.add_token(TokenType.LESS_EQUAL if self.match("=") 
-                    else TokenType.LESS)
+                self.add_token(
+                    TokenType.LESS_EQUAL if self.match("=") else TokenType.LESS
+                )
             case ">":
-                self.add_token(TokenType.GREATER_EQUAL if self.match("=") 
-                    else TokenType.GREATER)
+                self.add_token(
+                    TokenType.GREATER_EQUAL if self.match("=") else TokenType.GREATER
+                )
             case "/":
                 if self.match("/"):
                     # comments go to end of line
@@ -82,6 +86,7 @@ class Scanner:
                     self.identifier()
                 else:
                     from plox.lox import Lox
+
                     c: str = self.source[self.current - 1]
                     Lox.error(self.line, f"Unexpected character: {c}")
 
@@ -89,7 +94,7 @@ class Scanner:
         while self.is_alpha_numeric(self.peek()):
             self.advance()
 
-        source: str = self.source[self.start: self.current]
+        source: str = self.source[self.start : self.current]
 
         try:
             token_type: TokenType = TokenType(source)
@@ -103,16 +108,17 @@ class Scanner:
             if self.peek() == "\n":
                 self.line += 1
             self.advance()
-        
+
         if self.isAtEnd():
             from plox.lox import Lox
+
             Lox.error(self.line, "Unterminated string")
             return None
-        
+
         # the closing "
         self.advance()
 
-        value: str = self.source[self.start + 1: self.current - 1]
+        value: str = self.source[self.start + 1 : self.current - 1]
         self.add_token(TokenType.STRING, value)
 
     def is_digit(self, c: str) -> bool:
@@ -120,7 +126,7 @@ class Scanner:
 
     def is_alpha(self, c: str) -> bool:
         return True if c in LETTERS else False
-    
+
     def is_alpha_numeric(self, c: str) -> bool:
         return self.is_digit(c) or self.is_alpha(c)
 
@@ -130,11 +136,11 @@ class Scanner:
 
         if self.peek() == "." and self.is_digit(self.peek_next()):
             self.advance()
-        
+
             while self.is_digit(self.peek()):
                 self.advance()
 
-        self.add_token(TokenType.NUMBER, float(self.source[self.start: self.current]))
+        self.add_token(TokenType.NUMBER, float(self.source[self.start : self.current]))
 
     def match(self, expected: str) -> bool:
         if self.isAtEnd():
@@ -152,18 +158,18 @@ class Scanner:
             return self.source[self.current]
 
     def peek_next(self) -> str:
-        if (self.current + 1 >= len(self.source)):
+        if self.current + 1 >= len(self.source):
             return "\0"
         else:
             return self.source[self.current + 1]
 
     def advance(self) -> str:
-        char: str = self.source[self.current: self.current + 1]
+        char: str = self.source[self.current : self.current + 1]
         self.current += 1
         return char
 
     def add_token(self, type: TokenType, literal: Any = None):
-        text: str = self.source[self.start: self.current]
+        text: str = self.source[self.start : self.current]
         self.tokens.append(Token(type, text, literal, self.line))
 
     def isAtEnd(self) -> bool:

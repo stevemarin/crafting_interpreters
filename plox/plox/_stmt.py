@@ -1,4 +1,3 @@
-
 from abc import ABCMeta, abstractmethod
 from enum import Enum, auto
 from textwrap import dedent
@@ -14,33 +13,37 @@ if TYPE_CHECKING:
     from plox._interpreter import Interpreter
     from plox._expr import Expr, Variable as VariableExpr
 
+
 class FunctionType(Enum):
     NONE = auto()
     FUNCTION = auto()
     INITIALIZER = auto()
     METHOD = auto()
 
+
 class ClassType(Enum):
     NONE = auto()
     CLASS = auto()
     SUBCLASS = auto()
 
+
 class Stmt(metaclass=ABCMeta):
     @abstractmethod
     def __init__(self) -> None:
         ...
-    
+
     @abstractmethod
     def __repr__(self) -> str:
         ...
-    
+
     @abstractmethod
     def evaluate(self) -> None:
         ...
-    
+
     @abstractmethod
     def resolve(self, resolver: "Resolver") -> None:
         ...
+
 
 class Print(Stmt):
     def __init__(self, expression: "Expr") -> None:
@@ -48,38 +51,40 @@ class Print(Stmt):
 
     def __repr__(self) -> str:
         return f"(print {self.expression})"
-    
+
     def evaluate(self) -> None:
         value: Any = self.expression.evaluate()
         print(stringify(value))
         return None
-    
+
     def resolve(self, resolver: "Resolver") -> None:
         self.expression.resolve(resolver)
         return None
 
+
 class Expression(Stmt):
     def __init__(self, expression: "Expr") -> None:
         self.expression = expression
-    
+
     def __repr__(self) -> str:
         return f"(expr-eval {self.expression})"
-    
+
     def evaluate(self) -> None:
         self.expression.evaluate()
         return None
-    
+
     def resolve(self, resolver: "Resolver") -> None:
         self.expression.resolve(resolver)
+
 
 class Variable(Stmt):
     def __init__(self, name: Token, initializer: "None | Expr") -> None:
         self.name = name
         self.initializer = initializer
-    
+
     def __repr__(self) -> str:
         return f"(var {self.name} {self.initializer})"
-    
+
     def evaluate(self) -> None:
         if self.initializer is not None:
             value: Any = self.initializer.evaluate()
@@ -87,6 +92,7 @@ class Variable(Stmt):
             value = None
 
         from plox._interpreter import interpreter
+
         interpreter.environment.define(self.name.lexeme, value)
 
         return None
@@ -98,37 +104,39 @@ class Variable(Stmt):
         resolver.define(self.name)
         return None
 
+
 class Block(Stmt):
     def __init__(self, statements: list[Stmt]) -> None:
         self.statements = statements
-    
+
     def __repr__(self) -> str:
         joiner: str = "\n\t"
         return f"(block {joiner.join([str(s) for s in self.statements])})"
-    
+
     def evaluate(self) -> None:
         from plox._interpreter import interpreter
+
         self.execute_block(interpreter, Environment(enclosing=interpreter.environment))
-    
-    def execute_block(self, 
-                      interpreter: "Interpreter",
-                      environment: Environment
-                      ) -> None:
+
+    def execute_block(
+        self, interpreter: "Interpreter", environment: Environment
+    ) -> None:
         previous: Environment = interpreter.environment
-        
+
         try:
             interpreter.environment = environment
             for statement in self.statements:
                 statement.evaluate()
-        
+
         finally:
             interpreter.environment = previous
-        
+
     def resolve(self, resolver: "Resolver") -> None:
         resolver.begin_scope()
         for statement in self.statements:
             statement.resolve(resolver)
         resolver.end_scope()
+
 
 class If(Stmt):
     def __init__(self, condition: "Expr", then_branch: Stmt, else_branch: Stmt | None):
@@ -137,11 +145,13 @@ class If(Stmt):
         self.else_branch = else_branch
 
     def __repr__(self):
-        return dedent(f"""(if: 
+        return dedent(
+            f"""(if: 
                              then: {self.then_branch}
                              else: {self.else_branch})
-                       """)
-    
+                       """
+        )
+
     def evaluate(self) -> None:
         if is_truthy(self.condition.evaluate()):
             self.then_branch.evaluate()
@@ -154,33 +164,37 @@ class If(Stmt):
         if self.else_branch is not None:
             self.else_branch.resolve(resolver)
 
+
 class While(Stmt):
     def __init__(self, condition: "Expr", body: Stmt):
         self.condition = condition
         self.body = body
-    
+
     def __repr__(self):
-        return dedent(f"""(while {self.condition}
+        return dedent(
+            f"""(while {self.condition}
                             {self.body}
-                          )""")
+                          )"""
+        )
 
     def evaluate(self) -> None:
         while is_truthy(self.condition.evaluate()):
             self.body.evaluate()
-        
+
     def resolve(self, resolver: "Resolver") -> None:
         self.condition.resolve(resolver)
         self.body.resolve(resolver)
+
 
 class Function(Stmt):
     def __init__(self, name: Token, params: list[Token], body: list[Stmt]):
         self.name = name
         self.params = params
         self.body = body
-    
+
     def __repr__(self):
         return dedent(f"""(fn {self.name} {self.params})""")
-    
+
     def evaluate(self) -> None:
         from plox._callable import LoxFunction
         from plox._interpreter import interpreter
@@ -189,16 +203,14 @@ class Function(Stmt):
 
         environment = interpreter.environment
         environment.define(self.name.lexeme, f)
-    
+
     def resolve(self, resolver: "Resolver") -> None:
         resolver.declare(self.name)
         resolver.define(self.name)
         self.resolve_function(resolver, FunctionType.FUNCTION)
-    
+
     def resolve_function(
-        self, 
-        resolver: "Resolver", 
-        function_type: FunctionType
+        self, resolver: "Resolver", function_type: FunctionType
     ) -> None:
         enclosing_function: FunctionType = resolver.current_function
         resolver.current_function = function_type
@@ -213,22 +225,23 @@ class Function(Stmt):
 
         resolver.current_function = enclosing_function
 
+
 class Return(Stmt):
     def __init__(self, keyword: Token, value: "Expr | None") -> None:
         self.keyword = keyword
         self.value = value
-    
+
     def __repr__(self) -> str:
         return f"(return {self.keyword.lexeme}={self.value})"
-    
+
     def evaluate(self) -> None:
         if self.value is not None:
             value = self.value.evaluate()
         else:
             value = None
-        
+
         raise FakeReturnError(value)
-    
+
     def resolve(self, resolver: "Resolver") -> None:
         from plox.lox import Lox
 
@@ -237,20 +250,20 @@ class Return(Stmt):
 
         if self.value is not None:
             if resolver.current_function == FunctionType.INITIALIZER:
-                Lox.error_token(self.keyword, 
-                                "Can't return a value from an initializer.")
+                Lox.error_token(
+                    self.keyword, "Can't return a value from an initializer."
+                )
             self.value.resolve(resolver)
 
+
 class Class(Stmt):
-    def __init__(self, 
-                 name: Token,
-                 superclass: "VariableExpr | None",
-                 methods: list[Function]
-                ) -> None:
+    def __init__(
+        self, name: Token, superclass: "VariableExpr | None", methods: list[Function]
+    ) -> None:
         self.name = name
         self.superclass = superclass
         self.methods = methods
-    
+
     def __repr__(self) -> str:
         return f"(class {self.name.lexeme})"
 
@@ -260,10 +273,12 @@ class Class(Stmt):
         if self.superclass is not None:
             superclass = self.superclass.evaluate()
             if not isinstance(superclass, LoxClass):
-                raise LoxRuntimeError(self.superclass.name, 
-                                      "Superclass must be a class.")
+                raise LoxRuntimeError(
+                    self.superclass.name, "Superclass must be a class."
+                )
 
         from plox._interpreter import interpreter
+
         interpreter.environment.define(self.name.lexeme, None)
 
         if superclass is not None:
@@ -273,9 +288,7 @@ class Class(Stmt):
         methods: dict[str, LoxFunction] = {}
         for method in self.methods:
             function: LoxFunction = LoxFunction(
-                method, 
-                interpreter.environment, 
-                method.name.lexeme == "init"
+                method, interpreter.environment, method.name.lexeme == "init"
             )
             methods[method.name.lexeme] = function
 
@@ -286,7 +299,7 @@ class Class(Stmt):
             interpreter.environment = interpreter.environment.enclosing
 
         interpreter.environment.assign(self.name, _class)
-    
+
     def resolve(self, resolver: "Resolver") -> None:
         enclosing_class: ClassType = resolver.current_class
         resolver.current_class = ClassType.CLASS
@@ -294,16 +307,18 @@ class Class(Stmt):
         resolver.declare(self.name)
         resolver.define(self.name)
 
-        if (self.superclass is not None and 
-            self.name.lexeme == self.superclass.name.lexeme):
+        if (
+            self.superclass is not None
+            and self.name.lexeme == self.superclass.name.lexeme
+        ):
             from plox.lox import Lox
-            Lox.error_token(self.superclass.name,
-                "A class cannot inherit from itself.")
+
+            Lox.error_token(self.superclass.name, "A class cannot inherit from itself.")
 
         if self.superclass is not None:
             resolver.current_class = ClassType.SUBCLASS
             self.superclass.resolve(resolver)
-        
+
         if self.superclass is not None:
             resolver.begin_scope()
             resolver.scopes[-1]["super"] = True
@@ -316,7 +331,7 @@ class Class(Stmt):
             if method.name.lexeme == "init":
                 declaration = FunctionType.INITIALIZER
             method.resolve_function(resolver, declaration)
-        
+
         resolver.end_scope()
 
         if self.superclass is not None:

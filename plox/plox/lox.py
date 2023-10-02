@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 import sys
 import logging
@@ -11,11 +12,11 @@ from plox._interpreter import Interpreter, interpreter
 from plox._resolver import Resolver
 from plox._stmt import Stmt
 
-FORMAT = '%(asctime)s %(message)s'
+FORMAT = "%(asctime)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)
 
-class Lox:
 
+class Lox:
     interpreter: Final[Interpreter] = Interpreter()
     had_error: bool = False
     had_runtime_error: bool = False
@@ -24,14 +25,14 @@ class Lox:
     def run_file(cls, filename: str) -> None:
         with open(filename, "r") as fh:
             source: str = fh.read()
-        
+
         cls.run(source)
 
         if cls.had_error:
             sys.exit(65)
         elif cls.had_runtime_error:
             sys.exit(70)
-            
+
     @classmethod
     def run_prompt(cls) -> None:
         logging.info("Entering Interpreter...")
@@ -42,7 +43,7 @@ class Lox:
                 break
             cls.run(source)
             cls.had_error = False
-    
+
     @classmethod
     def run(cls, source: str) -> None:
         scanner = Scanner(source)
@@ -52,7 +53,7 @@ class Lox:
 
         if cls.had_error:
             return
-        
+
         resolver: Resolver = Resolver(interpreter)
         for statement in statements:
             statement.resolve(resolver)
@@ -61,11 +62,11 @@ class Lox:
             return
 
         cls.interpreter.interpret(statements)
-    
+
     @staticmethod
     def error(line: int, message: str) -> None:
         Lox.report(line, "", message)
-    
+
     @classmethod
     def runtime_error(cls, error: LoxRuntimeError):
         logging.error(error)
@@ -86,16 +87,17 @@ class Lox:
 
 def main(filename: str | None = None) -> None:
     if isinstance(filename, str):
-            Lox().run_file(filename)
+        Lox().run_file(filename)
     elif filename is None:
-            Lox().run_prompt()
+        Lox().run_prompt()
     else:
         logging.error("must pass a filename or nothing")
+
 
 if __name__ == "__main__":
     try:
         filename: str | None = sys.argv[1]
     except IndexError:
         filename = None
-    
+
     main(filename)
