@@ -5,4 +5,4 @@ test.clox
 
 .conda-env-*
 __pycache__
-
+.mypy_cache
