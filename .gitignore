@@ -1,5 +1,8 @@
 a.out
+test.clox
+
 .vscode
 
 .conda-env-*
 __pycache__
+
