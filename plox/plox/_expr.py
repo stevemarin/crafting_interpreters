@@ -157,7 +157,8 @@ class Unary(Expr):
         elif self.operator.type == TokenType.BANG:
             return not is_truthy(right)
         else:
-            raise LoxRuntimeError(self.operator, "Unexpected unary operator.")
+            message = f"Unexpected unary operator: '{self.operator.lexeme}'."
+            raise LoxRuntimeError(f"{message} [line {self.operator.line}]")
 
     @staticmethod
     def check_number_operand(operator: Token, operand: Any) -> None:
@@ -277,7 +278,8 @@ class Call(Expr):
         from plox._callable import LoxCallable
 
         if not isinstance(callee, LoxCallable):
-            raise LoxRuntimeError(self.paren, "Can only call functions and classes.")
+            message = f"Can only call functions and classes: '{self.paren.lexeme}'."
+            raise LoxRuntimeError(f"{message} [line {self.paren.line}]")
 
         function: LoxCallable = callee
 
@@ -311,7 +313,9 @@ class Get(Expr):
         if isinstance(_object, LoxInstance):
             return _object.get(self.name)
 
-        raise LoxRuntimeError(self.name, "Only instances have properties.")
+        message = f"Only instances have properties: '{self.name.lexeme}'."
+        raise LoxRuntimeError(f"{message} [line {self.name.line}]")
+
 
     def resolve(self, resolver: "Resolver") -> None:
         self.object.resolve(resolver)
@@ -375,16 +379,16 @@ class Super(Expr):
 
         distance: int | None = interpreter.locals.get(self)
         if distance is None:
-            raise LoxRuntimeError(self.method, "Cannot determine distance to expr.")
+            message = f"Cannot determine distance to expr: '{self.method.lexeme}'."
+            raise LoxRuntimeError(f"{message} [line {self.method.line}]")
 
         superclass: LoxClass = interpreter.environment.get_at(distance, "super")
         _object: LoxInstance = interpreter.environment.get_at(distance - 1, "this")
 
         method: LoxFunction | None = superclass.find_method(self.method.lexeme)
         if method is None:
-            raise LoxRuntimeError(
-                self.method, f"Undefined property {self.method.lexeme}."
-            )
+            message = f"Undefined property: '{self.method.lexeme}'."
+            raise LoxRuntimeError(f"{message} [line {self.method.line}]")
 
         return method.bind(_object)
 

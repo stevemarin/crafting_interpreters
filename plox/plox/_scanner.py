@@ -1,4 +1,5 @@
 import string
+from textwrap import dedent
 from typing import Any
 
 from plox._token import Token, TokenType
@@ -174,3 +175,164 @@ class Scanner:
 
     def isAtEnd(self) -> bool:
         return self.current >= len(self.source)
+
+
+def test_identifiers():
+    src = dedent(
+        """
+        andy formless fo _ _123 _abc ab123
+        abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_
+    """
+    )
+
+    results = [
+        "TokenType.IDENTIFIER andy None",
+        "TokenType.IDENTIFIER formless None",
+        "TokenType.IDENTIFIER fo None",
+        "TokenType.IDENTIFIER _ None",
+        "TokenType.IDENTIFIER _123 None",
+        "TokenType.IDENTIFIER _abc None",
+        "TokenType.IDENTIFIER ab123 None",
+        "TokenType.IDENTIFIER abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_ None",
+        "TokenType.EOF  None",
+    ]
+
+    scanner = Scanner(source=src)
+    scanner.scan_tokens()
+    for token, res in zip(scanner.tokens, results):
+        assert str(token) == res
+
+
+def test_keywords():
+    src = dedent(
+        """
+        and class else false for fun if nil or return super this true var while
+    """
+    )
+
+    results = [
+        "TokenType.AND and None",
+        "TokenType.CLASS class None",
+        "TokenType.ELSE else None",
+        "TokenType.FALSE false None",
+        "TokenType.FOR for None",
+        "TokenType.FUN fun None",
+        "TokenType.IF if None",
+        "TokenType.NIL nil None",
+        "TokenType.OR or None",
+        "TokenType.RETURN return None",
+        "TokenType.SUPER super None",
+        "TokenType.THIS this None",
+        "TokenType.TRUE true None",
+        "TokenType.VAR var None",
+        "TokenType.WHILE while None",
+        "TokenType.EOF  None",
+    ]
+
+    scanner = Scanner(source=src)
+    scanner.scan_tokens()
+    for token, res in zip(scanner.tokens, results):
+        assert str(token) == res
+
+
+def test_numbers():
+    src = dedent(
+        """
+        123
+        123.456
+        .456
+        123.
+    """
+    )
+
+    results = [
+        "TokenType.NUMBER 123 123.0",
+        "TokenType.NUMBER 123.456 123.456",
+        "TokenType.DOT . None",
+        "TokenType.NUMBER 456 456.0",
+        "TokenType.NUMBER 123 123.0",
+        "TokenType.DOT . None",
+        "TokenType.EOF  None",
+    ]
+
+    scanner = Scanner(source=src)
+    scanner.scan_tokens()
+    for token, res in zip(scanner.tokens, results):
+        assert str(token) == res
+
+
+def test_punctuators():
+    src = "(){};,+-*!===<=>=!=<>/."
+
+    results = [
+        "TokenType.LEFT_PAREN ( None",
+        "TokenType.RIGHT_PAREN ) None",
+        "TokenType.LEFT_BRACE { None",
+        "TokenType.RIGHT_BRACE } None",
+        "TokenType.SEMICOLON ; None",
+        "TokenType.COMMA , None",
+        "TokenType.PLUS + None",
+        "TokenType.MINUS - None",
+        "TokenType.STAR * None",
+        "TokenType.BANG_EQUAL != None",
+        "TokenType.EQUAL_EQUAL == None",
+        "TokenType.LESS_EQUAL <= None",
+        "TokenType.GREATER_EQUAL >= None",
+        "TokenType.BANG_EQUAL != None",
+        "TokenType.LESS < None",
+        "TokenType.GREATER > None",
+        "TokenType.SLASH / None",
+        "TokenType.DOT . None",
+        "TokenType.EOF  None",
+    ]
+
+    scanner = Scanner(source=src)
+    scanner.scan_tokens()
+    for token, res in zip(scanner.tokens, results):
+        assert str(token) == res
+
+
+def test_strings():
+    src = dedent(
+        """
+    ""
+    "string"
+    """
+    )
+
+    results = [
+        'TokenType.STRING "" ',
+        'TokenType.STRING "string" string',
+        "TokenType.EOF  None",
+    ]
+
+    scanner = Scanner(source=src)
+    scanner.scan_tokens()
+    for token, res in zip(scanner.tokens, results):
+        assert str(token) == res
+
+
+def test_whitespace():
+    src = dedent(
+        """
+        space    tabs				newlines
+
+
+
+
+        end
+    """
+    )
+
+    results = [
+        "TokenType.IDENTIFIER space None",
+        "TokenType.IDENTIFIER tabs None",
+        "TokenType.IDENTIFIER newlines None",
+        "TokenType.IDENTIFIER end None",
+        "TokenType.EOF  None",
+    ]
+
+    scanner = Scanner(source=src)
+    scanner.scan_tokens()
+    for token, res in zip(scanner.tokens, results):
+        assert str(token) == res

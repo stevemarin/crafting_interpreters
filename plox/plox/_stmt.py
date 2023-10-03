@@ -273,9 +273,8 @@ class Class(Stmt):
         if self.superclass is not None:
             superclass = self.superclass.evaluate()
             if not isinstance(superclass, LoxClass):
-                raise LoxRuntimeError(
-                    self.superclass.name, "Superclass must be a class."
-                )
+                message = f"Superclass must be a class: '{self.superclass.name.lexeme}'."
+                raise LoxRuntimeError(f"{message} [line {self.superclass.name.line}]")
 
         from plox._interpreter import interpreter
 

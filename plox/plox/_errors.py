@@ -1,19 +1,17 @@
-from textwrap import dedent
 from typing import Any
 
 from plox._token import Token
 
 
 class LoxRuntimeError(RuntimeError):
-    def __init__(self, token: Token, message: str):
-        self.token = token
-        self.message = message
+    pass
+    # def __init__(self, token: Token, message: str):
+    #     super().__init__(message)
+    #     self.token = token
+    #     self.message = message
 
-    def __repr__(self):
-        return dedent(
-            f"""{self.message}
-                          [line {self.token.line}]"""
-        )
+    # def __repr__(self):
+    #     return f"{self.message} [line {self.token.line}]"
 
 
 class FakeReturnError(RuntimeError):

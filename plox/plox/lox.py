@@ -29,8 +29,10 @@ class Lox:
         cls.run(source)
 
         if cls.had_error:
+            logging.info("SYNTAX ERROR")
             sys.exit(65)
         elif cls.had_runtime_error:
+            logging.info("RUNTIME ERROR")
             sys.exit(70)
 
     @classmethod
@@ -74,15 +76,15 @@ class Lox:
 
     @classmethod
     def report(cls, line: int, where: str, message: str) -> None:
-        logging.error(f"[line {line}] Errror {where}: {message}")
+        logging.error(f"[line {line}] Error {where}: {message}")
         cls.had_error = True
 
     @classmethod
     def error_token(cls, token: Token, message: str) -> None:
         if token.type == TokenType.EOF:
-            cls.report(token.line, " at end ", message)
+            cls.report(token.line, "at end", message)
         else:
-            cls.report(token.line, f" at '{token.lexeme}' ", message)
+            cls.report(token.line, f"at '{token.lexeme}'", message)
 
 
 def main(filename: str | None = None) -> None:
