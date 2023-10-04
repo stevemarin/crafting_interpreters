@@ -35,14 +35,13 @@ class Clock(LoxCallable):
         pass
 
     def __repr__(self):
-        return "<native-fn clock>"
+        return "<native fn>"    
 
     def arity(self) -> int:
         return 0
 
     def call(self):
         from time import time
-
         return time()
 
 
@@ -55,7 +54,7 @@ class LoxFunction(LoxCallable):
         self.is_initializer = is_initializer
 
     def __repr__(self) -> str:
-        return f"<fn {self.declaration.name}>"
+        return f"<fn {self.declaration.name.lexeme}>"
 
     def arity(self) -> int:
         return len(self.declaration.params)

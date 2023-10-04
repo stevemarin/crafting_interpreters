@@ -10,14 +10,13 @@ if TYPE_CHECKING:
 
 class Interpreter:
     def __init__(self) -> None:
-        self.globals: Final[Environment] = Environment()
-        self.locals: dict[Expr, int] = {}
-
         from plox._callable import Clock
+        clock = Clock()
 
-        self.globals.define("clock", Clock)
-
+        self.globals: Final[Environment] = Environment()
+        self.globals.define("clock", clock)
         self.environment: Environment = self.globals
+        self.locals: dict[Expr, int] = {}
 
     def resolve(self, expr: "Expr", depth: int):
         self.locals[expr] = depth
