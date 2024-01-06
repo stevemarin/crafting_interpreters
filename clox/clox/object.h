@@ -23,7 +23,7 @@
 #define AS_INSTANCE(value) ((ObjInstance*)AS_OBJ(value))
 #define AS_NATIVE(value) (((ObjNative*)AS_OBJ(value))->function)
 #define AS_STRING(value) ((ObjString*)AS_OBJ(value))
-#define AS_CSTRING(value) (((ObjString*)AS_OBJ(value))->chars)
+#define AS_CSTRING(value) (((ObjString*)AS_OBJ(value))->chars
 
 typedef enum {
     OBJ_BOUND_METHOD,
